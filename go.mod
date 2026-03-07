@@ -1,4 +1,4 @@
-module github.com/narvdeshwar/iot-rag-engine
+module github.com/narvdeshwar/IOT-rag
 
 go 1.25.0
 
