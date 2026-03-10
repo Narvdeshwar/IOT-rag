@@ -1,77 +1,30 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
 import {
-    LayoutDashboard,
-    MessageSquare,
-    Settings,
     Cpu,
-    Database,
-    ChevronRight
 } from "lucide-react";
-import { cn } from "../../lib/utils";
-
-const sidebarItems = [
-    { name: "Dashboard", icon: LayoutDashboard, path: "/" },
-    { name: "IoT Devices", icon: Cpu, path: "/devices" },
-    { name: "RAG Explorer", icon: MessageSquare, path: "/rag" },
-    { name: "Knowledge Base", icon: Database, path: "/kb" },
-    { name: "Settings", icon: Settings, path: "/settings" },
-];
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
-    const location = useLocation();
-
     return (
-        <div className="flex h-screen bg-background text-foreground overflow-hidden">
-            {/* Sidebar */}
-            <aside className="w-64 border-r border-border bg-card/50 backdrop-blur-xl flex flex-col">
-                <div className="p-6 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                        <Cpu className="text-primary-foreground w-5 h-5" />
-                    </div>
-                    <span className="font-bold text-xl tracking-tight">IoT-RAG</span>
-                </div>
-
-                <nav className="flex-1 px-4 space-y-2">
-                    {sidebarItems.map((item) => {
-                        const isActive = location.pathname === item.path;
-                        const Icon = item.icon;
-                        return (
-                            <Link
-                                key={item.path}
-                                to={item.path}
-                                className={cn(
-                                    "flex items-center gap-3 px-3 py-2 rounded-lg transition-all group",
-                                    isActive
-                                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                                )}
-                            >
-                                <Icon className={cn("w-5 h-5", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-accent-foreground")} />
-                                <span className="flex-1 font-medium">{item.name}</span>
-                                {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
-                            </Link>
-                        );
-                    })}
-                </nav>
-
-                <div className="p-4 border-t border-border">
-                    <div className="flex items-center gap-3 p-2 rounded-lg bg-accent/50">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-purple-500" />
-                        <div className="flex-1 overflow-hidden">
-                            <p className="text-sm font-medium truncate">Senior Architect</p>
-                            <p className="text-xs text-muted-foreground truncate">Admin System</p>
-                        </div>
-                    </div>
-                </div>
-            </aside>
+        <div className="flex h-screen bg-background text-foreground overflow-hidden relative">
+            {/* Ambient Background Glows */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full" />
+                <div className="absolute top-[20%] -right-[10%] w-[30%] h-[30%] bg-purple-500/10 blur-[100px] rounded-full" />
+                <div className="absolute -bottom-[10%] left-[20%] w-[35%] h-[35%] bg-blue-500/10 blur-[110px] rounded-full" />
+            </div>
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                <header className="h-16 border-b border-border flex items-center justify-between px-8 bg-background/50 backdrop-blur-md sticky top-0 z-10">
+            <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
+                <header className="h-16 border-b border-border/50 flex items-center justify-between px-8 bg-background/30 backdrop-blur-xl sticky top-0 z-10">
                     <div className="flex items-center gap-4">
-                        <h1 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                            System Console / {sidebarItems.find(i => i.path === location.pathname)?.name || "Live"}
+                        <div className="flex items-center gap-3">
+                            <div className="w-7 h-7 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center">
+                                <Cpu className="text-primary w-4 h-4" />
+                            </div>
+                            <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">IoT-RAG Engine</span>
+                        </div>
+                        <div className="h-4 w-[1px] bg-border/50 mx-2" />
+                        <h1 className="text-xs font-medium text-muted-foreground uppercase tracking-[0.2em]">
+                            Intelligence Fusion Console
                         </h1>
                     </div>
                     <div className="flex items-center gap-4">
