@@ -1,15 +1,16 @@
 package api
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/narvdeshwar/IOT-rag/internal/cache"
-	"github.com/narvdeshwar/IOT-rag/internal/embedder"
-	"github.com/narvdeshwar/IOT-rag/internal/llm"
-	"github.com/narvdeshwar/IOT-rag/internal/retriever"
+	"github.com/narvdeshwar/IOT-rag/internal/telemetry"
+	"github.com/narvdeshwar/IOT-rag/internal/types"
 )
 
 type QueryRequest struct {
@@ -22,9 +23,13 @@ type QueryResponse struct {
 }
 
 type Service struct {
-	Embedder  *embedder.OpenAIEmbedder
-	Retriever *retriever.Retriever
-	LLM       *llm.LLM
+	Embedder  types.Embedder
+	Retriever Retriever
+	LLM       types.LLM
+}
+
+type Retriever interface {
+	Search(ctx context.Context, vec []float32, k int) ([]telemetry.EmbeddedChunk, error)
 }
 
 func QueryHandler(svc *Service) gin.HandlerFunc {
@@ -55,12 +60,18 @@ func QueryHandler(svc *Service) gin.HandlerFunc {
 			return
 		}
 
+		fmt.Printf("\nDEBUG: Found %d relevant chunks in DB\n", len(chunks))
+
 		// Build prompt
 		contextStr := ""
-		for _, ch := range chunks {
+		for i, ch := range chunks {
 			contextStr += ch.Content + "\n"
+			fmt.Printf("Chunk %d: %s\n", i, ch.Content)
 		}
 		prompt := fmt.Sprintf("Context:\n%s\n\nQuestion: %s", contextStr, req.Query)
+		
+		fmt.Println("\nDEBUG: Final Prompt sent to LLM:")
+		fmt.Println(prompt)
 
 		// Stream
 		c.Header("Content-Type", "text/event-stream")
@@ -68,7 +79,8 @@ func QueryHandler(svc *Service) gin.HandlerFunc {
 		c.Header("Connection", "keep-alive")
 
 		full, err := svc.LLM.StreamComplete(c.Request.Context(), prompt, func(token string) {
-			fmt.Fprintf(c.Writer, "data: %s\n\n", token)
+			b, _ := json.Marshal(map[string]string{"token": token})
+			fmt.Fprintf(c.Writer, "data: %s\n\n", string(b))
 			c.Writer.Flush()
 		})
 		if err != nil {

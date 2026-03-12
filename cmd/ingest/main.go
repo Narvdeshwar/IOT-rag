@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/narvdeshwar/IOT-rag/internal/config"
 	"github.com/narvdeshwar/IOT-rag/internal/db"
@@ -35,10 +34,18 @@ func main() {
 		fmt.Println("Using OpenAI for embeddings...")
 	}
 
-	w := ingestor.NewWorker(emb)
+	worker := ingestor.NewWorker(emb)
+	ctx := context.Background()
+
+	total := 0
 	for {
-		w.ProcessBatch(context.Background())
-		fmt.Println("Waiting for next batch...")
-		time.Sleep(30 * time.Second)
+		processed := worker.ProcessBatch(ctx)
+		if processed == 0 {
+			break
+		}
+		total += processed
+		fmt.Printf("Processed %d events...\n", total)
 	}
+
+	fmt.Printf("\nIngestion complete! Total events processed and embedded: %d\n", total)
 }

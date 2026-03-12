@@ -24,7 +24,8 @@ CREATE TABLE telemetry_chunks (
     device_id TEXT,
     event_time TIMESTAMPTZ,
     metadata JSONB,
-    embedding VECTOR(1536)
+    event_id BIGINT UNIQUE,
+    embedding VECTOR(768)
 );
 
 CREATE INDEX ON telemetry_chunks USING hnsw (embedding vector_cosine_ops);

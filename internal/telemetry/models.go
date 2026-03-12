@@ -32,4 +32,5 @@ type EmbeddedChunk struct {
 	EventTime  time.Time       `json:"event_time"`
 	Metadata   json.RawMessage `json:"metadata"`
 	Embedding  pgvector.Vector `json:"embedding"`
+	Similarity float32         `json:"similarity"`
 }

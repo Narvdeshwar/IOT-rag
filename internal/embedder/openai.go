@@ -3,18 +3,20 @@ package embedder
 import (
 	"context"
 
-	"github.com/narvdeshwar/IOT-rag/internal/config"
 	"github.com/narvdeshwar/IOT-rag/internal/logger"
-	openai "github.com/sashabaranov/go-openai"
+	"github.com/narvdeshwar/IOT-rag/internal/types"
+	"github.com/sashabaranov/go-openai"
 )
+
+var _ types.Embedder = (*OpenAIEmbedder)(nil)
 
 type OpenAIEmbedder struct {
 	client *openai.Client
 }
 
-func NewEmbedder() *OpenAIEmbedder {
+func NewEmbedder(apiKey string) *OpenAIEmbedder {
 	return &OpenAIEmbedder{
-		client: openai.NewClient(config.Load().OpenAIKey),
+		client: openai.NewClient(apiKey),
 	}
 }
 

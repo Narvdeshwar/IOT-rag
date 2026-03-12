@@ -4,15 +4,18 @@ import (
 	"context"
 	"io"
 
+	"github.com/narvdeshwar/IOT-rag/internal/types"
 	openai "github.com/sashabaranov/go-openai"
 )
+
+var _ types.LLM = (*LLM)(nil)
 
 type LLM struct {
 	client *openai.Client
 }
 
-func NewLLM() *LLM {
-	return &LLM{client: openai.NewClient("")}
+func NewLLM(apiKey string) *LLM {
+	return &LLM{client: openai.NewClient(apiKey)}
 }
 
 func (l *LLM) StreamComplete(ctx context.Context, prompt string, onToken func(string)) (string, error) {

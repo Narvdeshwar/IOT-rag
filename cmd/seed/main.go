@@ -19,6 +19,11 @@ func main() {
 
 	ctx := context.Background()
 
+	// STEP 0: clean start
+	fmt.Println("Cleaning existing data...")
+	_, _ = db.Pool.Exec(ctx, "TRUNCATE TABLE sensor_events RESTART IDENTITY CASCADE")
+	_, _ = db.Pool.Exec(ctx, "TRUNCATE TABLE telemetry_chunks RESTART IDENTITY CASCADE")
+
 	// STEP 1: seed devices
 	for i := 1; i <= 50; i++ {
 		deviceID := fmt.Sprintf("dev-%03d", i)
@@ -42,12 +47,23 @@ func main() {
 	// STEP 2: seed sensor events
 	for i := 0; i < 1000; i++ {
 
+		metrics := []struct {
+			name string
+			unit string
+		}{
+			{"voltage", "V"},
+			{"current", "A"},
+			{"temp", "°C"},
+			{"faults", "count"},
+		}
+		m := metrics[rand.Intn(len(metrics))]
+
 		event := telemetry.SensorEvent{
 			DeviceID:  fmt.Sprintf("dev-%03d", rand.Intn(50)+1),
 			EventTime: time.Now().Add(-time.Duration(rand.Intn(7*24)) * time.Hour),
-			Metric:    []string{"voltage", "current", "temp", "faults"}[rand.Intn(4)],
+			Metric:    m.name,
 			Value:     rand.Float64() * 100,
-			Unit:      []string{"V", "A", "°C", "count"}[rand.Intn(4)],
+			Unit:      m.unit,
 			Metadata:  json.RawMessage(`{"zone":"Zone 3","status":"active"}`),
 		}
 

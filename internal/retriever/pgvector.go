@@ -15,7 +15,7 @@ func (r *Retriever) Search(ctx context.Context, vec []float32, topK int) ([]tele
 		SELECT id, content, device_id, event_time, metadata,
 		       1 - (embedding <=> $1::vector) AS similarity
 		FROM telemetry_chunks
-		WHERE 1 - (embedding <=> $1::vector) > 0.75
+		WHERE 1 - (embedding <=> $1::vector) > 0.3
 		ORDER BY embedding <=> $1::vector
 		LIMIT $2`, pgvector.NewVector(vec), topK)
 	if err != nil {
@@ -26,7 +26,10 @@ func (r *Retriever) Search(ctx context.Context, vec []float32, topK int) ([]tele
 	var chunks []telemetry.EmbeddedChunk
 	for rows.Next() {
 		var c telemetry.EmbeddedChunk
-		rows.Scan(&c.ID, &c.Content, &c.DeviceID, &c.EventTime, &c.Metadata)
+		err := rows.Scan(&c.ID, &c.Content, &c.DeviceID, &c.EventTime, &c.Metadata, &c.Similarity)
+		if err != nil {
+			return nil, err
+		}
 		chunks = append(chunks, c)
 	}
 	return chunks, nil
